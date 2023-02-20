@@ -1,0 +1,61 @@
+name: Android CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
+      - 'main'
+    # 在push tag时触发
+    tags:
+      - '*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup timezone
+      # You may pin to the exact commit or the version.
+      # uses: zcong1993/setup-timezone@7215c3ec086d387e4618c4b81482d06d998c90a9
+      uses: zcong1993/setup-timezone@v1.1.2
+      with:
+        # which timezone you want to use
+        timezone: Asia/Shanghai # default is UTC
+    - name: F**k you bad packet header
+      run: |
+        git config --global pack.windowMemory "1001m"
+        git config --global pack.packSizeLimit "1001m"
+        git config --global pack.threads "1"
+        git config --global pack.deltaCacheSize "512m"
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: fuck at JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          !~/.gradle/caches/build-cache-*
+        key: gradle-deps-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: gradle-deps
+    - name: Fuck execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build♂with♂Gradle
+      run: cd HMCLPE&&../gradlew build
+    #step：上传apk 到action，在右上角查看
+    # 官方文档 https://help.github.com/cn/actions/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts#uploading-build-and-test-artifactst
+    - name: Fuck↑ APK to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: HMCLPE-release-selfsigned.apk
+        path: HMCLPE/build/outputs/apk/release/HMCLPE-release.apk
+        asset_content_type: application/apk
