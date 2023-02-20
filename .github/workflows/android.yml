@@ -59,3 +59,7 @@ jobs:
         name: FCL-release-selfsigned.apk
         path: FCLauncher/build/outputs/apk/release/FCLauncher-release.apk
         asset_content_type: application/apk
+    - name: tree dir in FCL
+      run: |
+        tree FCLauncher
+        if [ "$?" != "0" ];then tree .;fi;
