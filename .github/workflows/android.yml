@@ -47,8 +47,9 @@ jobs:
     #      !~/.gradle/caches/build-cache-*
     #    key: gradle-deps-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
     #    restore-keys: gradle-deps
+    # well this embedded build
     - uses: burrunan/gradle-cache-action@v1
-      name: Build PROJECT_NAME
+      name: Gradle build with better cache
       # Extra environment variables for Gradle execution (regular GitHub Actions feature)
       # Note: env must be outside of "with"
       env:
@@ -74,10 +75,10 @@ jobs:
         properties: |
           kotlin.js.compiler=ir
           kotlin.parallel.tasks.in.project=true
-    - name: Fuck execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build♂with♂Gradle
-      run: cd FCL&&../gradlew build
+    #- name: Fuck execute permission for gradlew
+      #run: chmod +x gradlew
+    #- name: Build♂with♂Gradle
+      #run: cd FCL&&../gradlew build
     #step：上传apk 到action，在右上角查看
     # 官方文档 https://help.github.com/cn/actions/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts#uploading-build-and-test-artifactst
     - name: Fuck↑ APK to artifacts
