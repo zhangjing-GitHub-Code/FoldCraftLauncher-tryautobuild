@@ -120,6 +120,11 @@ public class DefaultLauncher extends Launcher {
             res.addDefault("-Dlog4j.configurationFile=", getLog4jConfigurationFile().getAbsolutePath());
         }
 
+        JavaVersion javaVersion = options.getJava().getId() == 0 ? JavaVersion.getSuitableJavaVersion(version) : options.getJava();
+        if (javaVersion.getVersion() == JavaVersion.JAVA_VERSION_17) {
+            res.addDefault("-Dext.net.resolvPath=", FCLPath.JAVA_17_PATH + "/resolv.conf");
+        }
+
         res.addDefault("-Djava.io.tmpdir=", FCLPath.CACHE_DIR);
         res.addDefault("-Dos.name=", "Linux");
         res.addDefault("-Dlwjgl.platform=", "FCL");
