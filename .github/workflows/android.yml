@@ -43,8 +43,8 @@ jobs:
       #if: ${{ env.cont == true }}
       run: echo "Sha is ${{ env.sha }}"
     - name: exit if triggered by tag
-      if: ${{ steps.sha.outputs.tag }} == "GETBACK" 
-      run: return 1
+      if: ${{ steps.sha.env.cont == false }} 
+      run: exit 1
     - name: Setup timezone
       # You may pin to the exact commit or the version.
       # uses: zcong1993/setup-timezone@7215c3ec086d387e4618c4b81482d06d998c90a9
