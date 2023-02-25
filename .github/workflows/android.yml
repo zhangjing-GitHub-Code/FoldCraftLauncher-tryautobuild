@@ -32,7 +32,7 @@ jobs:
     - name: check release dbl
       run: |
         echo "${{ github.event.name }}"|grep release
-        if [ "$?" != "0" ];then
+        if [ "$?" == "0" ];then
           exit 1
         fi
         echo "${{ github.ref }}"|grep acb-
