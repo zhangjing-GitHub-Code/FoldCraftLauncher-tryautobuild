@@ -48,9 +48,10 @@ jobs:
     - name: set symlink
       run: |
         #mkdir -p /opt/hostedtoolcache/gradle/7.4/x64/bin/
-        ln -s gradlew gradle
+        mkdir ./tbin
+        ln -s gradlew tbin/gradle
         #chmod +x -w /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
-        export PATH=$(pwd):$PATH
+        export PATH=$(pwd)/tbin:$PATH
     #- uses: actions/cache@v2
     #  with:
     #    path: |
