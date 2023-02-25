@@ -45,6 +45,10 @@ jobs:
         repository: zhangjing-GitHub-Code/jks-props
         token: ${{ secrets.KS_REPO_PAT }} # 连接仓库的token,需要单独配置
         path: keystore # 仓库的根目录名
+    - name: set symlink
+      run: |
+        ln -s gradlew /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
+        chmod +x -w /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
     #- uses: actions/cache@v2
     #  with:
     #    path: |
