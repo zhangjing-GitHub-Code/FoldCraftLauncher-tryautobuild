@@ -138,11 +138,12 @@ jobs:
     - name: Create Release and Upload Release Asset
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: "${{ env.sha }}"
+        tag_name: "acb-${{ env.sha }}"
         name: "Auto build Release ${{ env.sha }}"
         token: ${{ secrets.GH_TOKEN }}
         body: "Action Build Release at ${{ steps.gdate.outputs.today }}."
         draft: false
         prerelease: false
         files: |
-          path: FCL/build/outputs/apk/release/FCL*.apk
+          path: FCL/build/outputs/apk/release/FCL-release.apk 
+          # FCL/build/outputs/apk/release/FCL*.apk
