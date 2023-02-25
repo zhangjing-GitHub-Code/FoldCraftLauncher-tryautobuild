@@ -33,10 +33,12 @@ jobs:
       run: |
         echo "${{ github.event.name }}"|grep release
         if [ "$?" == "0" ];then
+          echo EVENT TYPE RELEASE
           exit 1
         fi
-        echo "${{ github.ref }}"|grep acb-
+        echo "${{ github.ref }}"|grep "acb-"
         if [ "$?" == "0" ];then
+          echo REF CONTAINS RELEASED CHARS
           exit 1
         fi
     - name: Setup timezone
