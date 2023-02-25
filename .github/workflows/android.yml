@@ -39,6 +39,12 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: gradle
+    - name: Checkout Android Keystore
+      uses: actions/checkout@v2
+      with:
+        repository: zhangjing-GitHub-Code/jks-props
+        token: ${{ secrets.ACCESS_KS_PAT }} # 连接仓库的token,需要单独配置
+        path: keystore # 仓库的根目录名
     #- uses: actions/cache@v2
     #  with:
     #    path: |
