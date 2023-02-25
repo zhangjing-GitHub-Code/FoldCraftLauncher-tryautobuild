@@ -21,6 +21,9 @@ jobs:
     - name: check commit sha
       uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
       id: sha
+    - name: print got sha
+      if: ${{ env.cont == true }}
+      run: echo "Sha is ${{ env.sha }}"
     - name: exit if triggered by tag
       if: ${{ env.cont == false }}
       run: return 1
