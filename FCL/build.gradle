@@ -1,7 +1,11 @@
 plugins {
     id 'com.android.application'
 }
-
+def keyProps = new Properties()
+def keyPropsFile = rootProject.file('keystore/keystore.properties')
+if (keyPropsFile.exists()) {
+    keyProps.load(new FileInputStream(keyPropsFile))
+}
 android {
     namespace 'com.tungsten.fcl'
     compileSdk 33
@@ -15,11 +19,21 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    
+    signingConfigs {
+        release {
+            keyAlias keyProps['keyAlias']
+            keyPassword keyProps['keyPassword']
+            storeFile keyProps['storeFile'] ? file(keyProps['storeFile']) : null
+            storePassword keyProps['storePassword']
+        }
+    }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
