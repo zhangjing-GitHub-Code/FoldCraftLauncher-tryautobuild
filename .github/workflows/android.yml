@@ -47,9 +47,10 @@ jobs:
         path: keystore # 仓库的根目录名
     - name: set symlink
       run: |
-        mkdir -p /opt/hostedtoolcache/gradle/7.4/x64/bin/
-        ln -s gradlew /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
-        chmod +x -w /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
+        #mkdir -p /opt/hostedtoolcache/gradle/7.4/x64/bin/
+        ln -s gradlew gradle
+        #chmod +x -w /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
+        export PATH=$(pwd):$PATH
     #- uses: actions/cache@v2
     #  with:
     #    path: |
