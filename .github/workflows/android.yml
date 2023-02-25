@@ -20,22 +20,7 @@ jobs:
     - name: check commit sha
       uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
       id: sha
-    - name: check sha
-      if: "${{ 1 == 2 }}"
-      id: shan
-      run: |
-        tag="${GITHUB_SHA}"
-        echo "cont=true" >> $GITHUB_ENV
-        # If release parse the tag name from GITHUB_REF
-        if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
-          ref="${GITHUB_REF}"
-          tag="GETBACK"
-          echo "cont=false" >> $GITHUB_ENV
-          exit 0
-        fi
-        echo "::set-output name=tag::$tag"
-        echo "sha=$tag" >> $GITHUB_ENV
-    - name: say sha
+    - name: Set commit sha to ENV
       run: |
         echo "sha=${{ github.sha }}" >> $GITHUB_ENV
     - name: print got sha
@@ -123,23 +108,15 @@ jobs:
         name: FCL-release-selfsigned.apk
         path: FCL/build/outputs/apk/release/FCL-release.apk
         asset_content_type: application/apk
-    #- name: run find in FCL
-      #run: |
-        #find . -name "*release*apk*" -type f
-        #if [ "$?" != "0" ];then tree .;fi;
     - name: Get current date
       id: gdate
       run: echo "::set-output name=today::$(date +'%Y-%m-%d_%H_%M_%S')"
-    #- name: Get commit id
-      #run: |
-        #echo "cmtid=${{ github.event.head_commit.sha }}" >> $GITHUB_ENV
-    # well i cant use ref cau(n)se 404
     - name: Create Release and Upload Release Asset
       uses: softprops/action-gh-release@v1
       with:
         tag_name: "acb-${{ env.sha }}"
         name: "Auto build Release ${{ env.sha }}"
-        token: ${{ secrets.GH_TOKEN }}
+        token: ${{ secrets.KS_REPO_PAT }}
         body: "Action Build Release at ${{ steps.gdate.outputs.today }}."
         draft: false
         prerelease: false
