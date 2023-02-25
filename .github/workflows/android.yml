@@ -18,6 +18,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: check commit sha
+      uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
+      id: sha
+    - name: exit if triggered by tag
+      if: ${{ env.cont == false }}
+      run: return 1
     - name: Setup timezone
       # You may pin to the exact commit or the version.
       # uses: zcong1993/setup-timezone@7215c3ec086d387e4618c4b81482d06d998c90a9
@@ -104,15 +110,15 @@ jobs:
     - name: Get current date
       id: gdate
       run: echo "::set-output name=today::$(date +'%Y-%m-%d_%H_%M_%S')"
-    - name: Get commit id
-      run: |
-        echo "cmtid=${{ github.event.head_commit.sha }}" >> $GITHUB_ENV
+    #- name: Get commit id
+      #run: |
+        #echo "cmtid=${{ github.event.head_commit.sha }}" >> $GITHUB_ENV
     # well i cant use ref cau(n)se 404
     - name: Create Release and Upload Release Asset
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: "${{ env.cmtid }}"
-        name: "Auto build Release ${{ env.id }}"
+        tag_name: "${{ env.sha }}"
+        name: "Auto build Release ${{ env.sha }}"
         token: ${{ secrets.GH_TOKEN }}
         body: "Action Build Release at ${{ steps.gdate.outputs.today }}."
         draft: false
