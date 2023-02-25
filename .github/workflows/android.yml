@@ -43,7 +43,7 @@ jobs:
       #if: ${{ env.cont == true }}
       run: echo "Sha is ${{ env.sha }}"
     - name: exit if triggered by tag
-      if: ${{ steps.sha.env.cont == false }} 
+      if: ${{ env.cont == false }} 
       run: exit 1
     - name: Setup timezone
       # You may pin to the exact commit or the version.
