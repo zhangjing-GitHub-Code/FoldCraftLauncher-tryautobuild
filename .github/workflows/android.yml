@@ -35,6 +35,9 @@ jobs:
         fi
         echo "::set-output name=tag::$tag"
         echo "sha=$tag" >> $GITHUB_ENV
+    - name: f**k all sha
+      run: |
+        echo "${{ github.sha }} ${{ github.event.head_commit.sha }}"
     - name: print got sha
       if: ${{ env.cont == true }}
       run: echo "Sha is ${{ env.sha }}"
