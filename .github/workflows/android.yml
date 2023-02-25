@@ -18,9 +18,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: check commit sha
-      uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
+    #- name: check commit sha
+      #uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
+      #id: sha
+    - name: check sha
       id: sha
+      run: |
+        tag="${GITHUB_SHA}"
+        echo "cont=true" >> $GITHUB_ENV
+        # If release parse the tag name from GITHUB_REF
+        if [ "${GITHUB_EVENT_NAME}" == "release" ]; then
+          ref="${GITHUB_REF}"
+          tag="GETBACK"
+          echo "cont=false" >> $GITHUB_ENV
+          exit 0
+        fi
+        echo "::set-output name=tag::$tag"
+        echo "sha=$tag" >> $GITHUB_ENV
     - name: print got sha
       if: ${{ env.cont == true }}
       run: echo "Sha is ${{ env.sha }}"
