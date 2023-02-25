@@ -18,11 +18,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    #- name: check commit sha
-      #uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
-      #id: sha
-    - name: check sha
+    - name: check commit sha
+      uses: zhangjing-GitHub-Code/get-github-sha@v2.1145
       id: sha
+    - name: check sha
+      if: "${{ 1 == 2 }}"
+      id: shan
       run: |
         tag="${GITHUB_SHA}"
         echo "cont=true" >> $GITHUB_ENV
@@ -35,14 +36,14 @@ jobs:
         fi
         echo "::set-output name=tag::$tag"
         echo "sha=$tag" >> $GITHUB_ENV
-    - name: f**k all sha
+    - name: say sha
       run: |
-        echo "${{ github.sha }} ${{ github.event.head_commit.sha }}"
+        echo "sha=${{ github.sha }}" >> $GITHUB_ENV
     - name: print got sha
-      if: ${{ env.cont == true }}
+      #if: ${{ env.cont == true }}
       run: echo "Sha is ${{ env.sha }}"
     - name: exit if triggered by tag
-      if: ${{ env.cont == false }}
+      if: ${{ steps.sha.outputs.tag == "GETBACK" }}
       run: return 1
     - name: Setup timezone
       # You may pin to the exact commit or the version.
