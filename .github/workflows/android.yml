@@ -7,8 +7,7 @@ on:
       - 'master'
       - 'main'
     # 在push tag时触发
-    tags:
-      - '*'
+    tags: []
   pull_request:
     branches: [ main ]
 
