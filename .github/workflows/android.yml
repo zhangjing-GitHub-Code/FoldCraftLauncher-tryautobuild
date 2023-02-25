@@ -101,3 +101,21 @@ jobs:
       #run: |
         #find . -name "*release*apk*" -type f
         #if [ "$?" != "0" ];then tree .;fi;
+    - name: Get current date
+      id: gdate
+      run: echo "::set-output name=today::$(date +'%Y-%m-%d_%H_%M_%S')"
+    - name: Get commit id
+      run: |
+        echo "cmtid=${{ github.event.head_commit.sha }}" >> $GITHUB_ENV
+    # well i cant use ref cau(n)se 404
+    - name: Create Release and Upload Release Asset
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: "${{ env.cmtid }}"
+        name: "Auto build Release ${{ env.id }}"
+        token: ${{ secrets.GH_TOKEN }}
+        body: "Action Build Release at ${{ steps.gdate.outputs.today }}."
+        draft: false
+        prerelease: false
+        files: |
+          path: FCL/build/outputs/apk/release/FCL*.apk
