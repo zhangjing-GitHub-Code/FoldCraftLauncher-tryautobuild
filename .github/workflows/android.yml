@@ -45,13 +45,8 @@ jobs:
         repository: zhangjing-GitHub-Code/jks-props
         token: ${{ secrets.KS_REPO_PAT }} # 连接仓库的token,需要单独配置
         path: keystore # 仓库的根目录名
-    - name: set symlink
+    - name: force gradle daemon
       run: |
-        #mkdir -p /opt/hostedtoolcache/gradle/7.4/x64/bin/
-        mkdir ./tbin
-        ln -s gradlew tbin/gradle
-        #chmod +x -w /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
-        export PATH=$(pwd)/tbin:$PATH
         export GRADLE_OPTS=-Dorg.gradle.daemon=true:$GRADLE_OPTS
     #- uses: actions/cache@v2
     #  with:
@@ -75,9 +70,10 @@ jobs:
         job-id: jdk11
         # Specifies arguments for Gradle execution
         # If arguments is missing or empty, then Gradle is not executed
-        arguments: build
+        arguments: --daemon build
         # arguments can be multi-line for better readability
         # arguments: |
+        #  --daemon
         #  --no-paralell
         #  build
         #  -x test
@@ -101,7 +97,7 @@ jobs:
         name: FCL-release-selfsigned.apk
         path: FCL/build/outputs/apk/release/FCL-release.apk
         asset_content_type: application/apk
-    - name: run find in FCL
-      run: |
-        find . -name "*release*apk*" -type f
-        if [ "$?" != "0" ];then tree .;fi;
+    #- name: run find in FCL
+      #run: |
+        #find . -name "*release*apk*" -type f
+        #if [ "$?" != "0" ];then tree .;fi;
