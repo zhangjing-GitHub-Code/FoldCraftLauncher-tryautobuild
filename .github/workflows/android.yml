@@ -144,5 +144,6 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          path: FCL/build/outputs/apk/release/FCL-release.apk 
-          # FCL/build/outputs/apk/release/FCL*.apk
+          FCL/build/outputs/apk/release/FCL-release.apk
+        # /home/runner/work/FoldCraftLauncher-tryautobuild/FoldCraftLauncher-tryautobuild/FCL/build/outputs/apk/release/FCL*.apk
+        # FCL/build/outputs/apk/release/FCL*.apk
