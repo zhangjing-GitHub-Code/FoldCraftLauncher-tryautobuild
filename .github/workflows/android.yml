@@ -124,7 +124,7 @@ jobs:
       with:
         tag_name: "acb-${{ env.sha }}"
         name: "Auto build Release ${{ env.sha }}"
-        token: ${{ secrets.KS_REPO_PAT }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         body: "Action Build Release at ${{ steps.gdate.outputs.today }}."
         draft: false
         prerelease: false
