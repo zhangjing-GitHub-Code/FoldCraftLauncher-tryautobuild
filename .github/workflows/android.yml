@@ -52,6 +52,7 @@ jobs:
         ln -s gradlew tbin/gradle
         #chmod +x -w /opt/hostedtoolcache/gradle/7.4/x64/bin/gradle
         export PATH=$(pwd)/tbin:$PATH
+        export GRADLE_OPTS=-Dorg.gradle.daemon=true:$GRADLE_OPTS
     #- uses: actions/cache@v2
     #  with:
     #    path: |
