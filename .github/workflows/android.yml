@@ -99,7 +99,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: FCL-release-selfsigned.apk
-        path: FCL/build/outputs/apk/release/FCLauncher-release.apk
+        path: FCL/build/outputs/apk/release/FCL-release.apk
         asset_content_type: application/apk
     - name: run find in FCL
       run: |
