@@ -180,6 +180,20 @@
     <string name="launch_state_waiting_launching">Waiting for the game to launch</string>
     <string name="launch_state_done">Completing launch</string>
 
+    <string name="menu_controls">Controller</string>
+    <string name="menu_controls_current">Current Controller</string>
+    <string name="menu_controls_edit_mode">Edit Mode</string>
+    <string name="menu_controls_show_boundary">Show View Boundaries</string>
+    <string name="menu_controls_groups">View Groups</string>
+    <string name="menu_controls_manage">Manage</string>
+    <string name="menu_controls_current_view_group">Current View Group</string>
+    <string name="menu_controls_add_button">Add Button</string>
+    <string name="menu_controls_add_direction">Add Direction Controller</string>
+    <string name="menu_controls_add_view_button">Add</string>
+    <string name="menu_controls_style">Styles</string>
+    <string name="menu_controls_button_style">Button Styles</string>
+    <string name="menu_controls_direction_style">Direction Controller Styles</string>
+
     <string name="menu_settings">Settings</string>
     <string name="menu_settings_debug">Debug</string>
     <string name="menu_settings_disable_be_gesture">Disable Advanced Gesture</string>
@@ -208,11 +222,39 @@
     <string name="menu_settings_show_log">Show Log</string>
 
     <string name="message_cancelled">Operation was cancelled</string>
+    <string name="message_failed">Operation Failed</string>
     <string name="message_unknown">Unknown</string>
     <string name="message_copy">Copy successfully!</string>
 
     <string name="mods">Mods</string>
+    <string name="mods_add">Add Mods</string>
+    <string name="mods_add_failed">Failed to install mod %s.</string>
+    <string name="mods_add_success">%s was installed successfully.</string>
+    <string name="mods_category">Category</string>
+    <string name="mods_check_updates">Check for Updates</string>
+    <string name="mods_check_updates_current_version">Current Version</string>
+    <string name="mods_check_updates_failed">Unable to download some of the files.</string>
+    <string name="mods_check_updates_file">File</string>
+    <string name="mods_check_updates_source">Source</string>
+    <string name="mods_check_updates_target_version">Target Version</string>
+    <string name="mods_check_updates_update">Update</string>
+    <string name="mods_choose_mod">Choose a mod</string>
+    <string name="mods_curseforge">CurseForge</string>
+    <string name="mods_dependencies">Dependencies</string>
+    <string name="mods_disable">Disable</string>
+    <string name="mods_download">Mod Download</string>
+    <string name="mods_download_title">Mod Download - %1s</string>
+    <string name="mods_enable">Enable</string>
     <string name="mods_manage">Manage Mods</string>
+    <string name="mods_mcbbs">MCBBS</string>
+    <string name="mods_mcmod">MCMOD</string>
+    <string name="mods_mcmod_page">MCMOD Page</string>
+    <string name="mods_mcmod_search">Search in MCMOD</string>
+    <string name="mods_modrinth">Modrinth</string>
+    <string name="mods_name">Name</string>
+    <string name="mods_not_modded">You must install a mod loader (Fabric, Forge or LiteLoader) first to manage your mods!</string>
+    <string name="mods_restore">Rollback</string>
+    <string name="mods_url">Official Page</string>
     
     <string name="modpack">Modpack</string>
     <string name="modpack_export">Export Modpack</string>
@@ -243,7 +285,7 @@
     <string name="settings_advanced_server_ip_prompt">Join automatically after launching the game.</string>
 
     <string name="settings_fcl_controller">Controller</string>
-    <string name="settings_fcl_controller_injector">BE Gesture (1.7.10 – 1.19.2)</string>
+    <string name="settings_fcl_controller_injector">BE Gesture</string>
     <string name="settings_fcl_renderer">Renderer</string>
     <string name="settings_fcl_renderer_gl4es" translatable="false">Holy GL4ES (OpenGL 2.1)</string>
     <string name="settings_fcl_renderer_virgl" translatable="false">VirGLRenderer (OpenGL 4.3)</string>

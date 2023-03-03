@@ -1,7 +1,10 @@
 package com.tungsten.fcl.control.data;
 
+import static com.tungsten.fcl.util.FXUtils.onInvalidating;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -13,19 +16,23 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.tungsten.fclcore.fakefx.beans.InvalidationListener;
+import com.tungsten.fclcore.fakefx.beans.Observable;
 import com.tungsten.fclcore.fakefx.beans.property.BooleanProperty;
 import com.tungsten.fclcore.fakefx.beans.property.ObjectProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleBooleanProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleObjectProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleStringProperty;
 import com.tungsten.fclcore.fakefx.beans.property.StringProperty;
+import com.tungsten.fclcore.fakefx.collections.FXCollections;
+import com.tungsten.fclcore.fakefx.collections.ObservableList;
+import com.tungsten.fclcore.util.fakefx.ObservableHelper;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Optional;
 
 @JsonAdapter(ButtonEventData.Serializer.class)
-public class ButtonEventData implements Cloneable {
+public class ButtonEventData implements Cloneable, Observable {
 
     /**
      * Press event
@@ -96,7 +103,7 @@ public class ButtonEventData implements Cloneable {
     }
 
     public ButtonEventData() {
-        
+        addPropertyChangedListener(onInvalidating(this::invalidate));
     }
 
     public void addPropertyChangedListener(InvalidationListener listener) {
@@ -104,10 +111,22 @@ public class ButtonEventData implements Cloneable {
         longPressEventProperty.addListener(listener);
         clickEventProperty.addListener(listener);
         doubleClickEventProperty.addListener(listener);
-        pressEventProperty.get().addPropertyChangedListener(listener);
-        longPressEventProperty.get().addPropertyChangedListener(listener);
-        clickEventProperty.get().addPropertyChangedListener(listener);
-        doubleClickEventProperty.get().addPropertyChangedListener(listener);
+    }
+
+    private ObservableHelper observableHelper = new ObservableHelper(this);
+
+    @Override
+    public void addListener(InvalidationListener listener) {
+        observableHelper.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+        observableHelper.removeListener(listener);
+    }
+
+    private void invalidate() {
+        observableHelper.invalidate();
     }
 
     @Override
@@ -155,7 +174,7 @@ public class ButtonEventData implements Cloneable {
     }
 
     @JsonAdapter(Event.Serializer.class)
-    public static class Event implements Cloneable {
+    public static class Event implements Cloneable, Observable {
 
         /**
          * Control mouse pointer
@@ -296,72 +315,31 @@ public class ButtonEventData implements Cloneable {
         /**
          * Output keycodes
          */
-        private final ObjectProperty<ArrayList<Integer>> outputKeycodesProperty = new SimpleObjectProperty<>(this, "outputKeycodes", new ArrayList<>());
+        private final ObservableList<Integer> outputKeycodesList = FXCollections.observableList(new ArrayList<>());
 
-        public ObjectProperty<ArrayList<Integer>> outputKeycodesProperty() {
-            return outputKeycodesProperty;
+        public ObservableList<Integer> outputKeycodesList() {
+            return outputKeycodesList;
         }
 
-        public void setOutputKeycodes(ArrayList<Integer> outputKeycodes) {
-            outputKeycodesProperty.set(outputKeycodes);
-        }
-
-        public ArrayList<Integer> getOutputKeycodes() {
-            return outputKeycodesProperty.get();
+        public void setOutputKeycodes(ObservableList<Integer> outputKeycodes) {
+            outputKeycodesList.setAll(outputKeycodes);
         }
 
         /**
          * Switch view group visibility
          */
-        private final ObjectProperty<ArrayList<String>> bindViewGroupProperty = new SimpleObjectProperty<>(this, "bindViewGroup", new ArrayList<>());
+        private final ObservableList<String> bindViewGroupList = FXCollections.observableList(new ArrayList<>());
 
-        public ObjectProperty<ArrayList<String>> bindViewGroupProperty() {
-            return bindViewGroupProperty;
+        public ObservableList<String> bindViewGroupList() {
+            return bindViewGroupList;
         }
 
-        public void setBindViewGroup(ArrayList<String> bindViewGroup) {
-            bindViewGroupProperty.set(bindViewGroup);
-        }
-
-        public ArrayList<String> getBindViewGroup() {
-            return bindViewGroupProperty.get();
+        public void setBindViewGroup(ObservableList<String> bindViewGroup) {
+            bindViewGroupList.setAll(bindViewGroup);
         }
 
         public Event() {
-            
-        }
-
-        public void addKeycode(int keycode) {
-            ArrayList<Integer> keycodes = getOutputKeycodes();
-            if (!keycodes.contains(keycode)) {
-                keycodes.add(keycode);
-                setOutputKeycodes(keycodes);
-            }
-        }
-
-        public void removeKeycode(int keycode) {
-            ArrayList<Integer> keycodes = getOutputKeycodes();
-            for (int i = 0; i < keycodes.size(); i++) {
-                if (keycodes.get(i) == keycode) {
-                    keycodes.remove(i);
-                    break;
-                }
-            }
-            setOutputKeycodes(keycodes);
-        }
-
-        public void bindViewGroup(String groupId) {
-            ArrayList<String> groups = getBindViewGroup();
-            if (!groups.contains(groupId)) {
-                groups.add(groupId);
-                setBindViewGroup(groups);
-            }
-        }
-
-        public void unbindViewGroup(String groupId) {
-            ArrayList<String> groups = getBindViewGroup();
-            groups.remove(groupId);
-            setBindViewGroup(groups);
+            addPropertyChangedListener(onInvalidating(this::invalidate));
         }
 
         public void addPropertyChangedListener(InvalidationListener listener) {
@@ -373,8 +351,24 @@ public class ButtonEventData implements Cloneable {
             switchTouchModeProperty.addListener(listener);
             inputProperty.addListener(listener);
             outputTextProperty.addListener(listener);
-            outputKeycodesProperty.addListener(listener);
-            bindViewGroupProperty.addListener(listener);
+            outputKeycodesList.addListener(listener);
+            bindViewGroupList.addListener(listener);
+        }
+
+        private ObservableHelper observableHelper = new ObservableHelper(this);
+
+        @Override
+        public void addListener(InvalidationListener listener) {
+            observableHelper.addListener(listener);
+        }
+
+        @Override
+        public void removeListener(InvalidationListener listener) {
+            observableHelper.removeListener(listener);
+        }
+
+        private void invalidate() {
+            observableHelper.invalidate();
         }
 
         @Override
@@ -388,8 +382,8 @@ public class ButtonEventData implements Cloneable {
             event.setSwitchTouchMode(isSwitchTouchMode());
             event.setInput(isInput());
             event.setOutputText(getOutputText());
-            event.setOutputKeycodes(getOutputKeycodes());
-            event.setBindViewGroup(getBindViewGroup());
+            event.setOutputKeycodes(outputKeycodesList());
+            event.setBindViewGroup(bindViewGroupList());
             return event;
         }
 
@@ -409,8 +403,8 @@ public class ButtonEventData implements Cloneable {
                 obj.addProperty("switchTouchMode", src.isSwitchTouchMode());
                 obj.addProperty("input", src.isInput());
                 obj.addProperty("outputText", src.getOutputText());
-                obj.addProperty("outputKeycodes", gson.toJson(src.getOutputKeycodes()));
-                obj.addProperty("bindViewGroup", gson.toJson(src.getBindViewGroup()));
+                obj.add("outputKeycodes", gson.toJsonTree(new ArrayList<>(src.outputKeycodesList()), new TypeToken<ArrayList<Integer>>(){}.getType()).getAsJsonArray());
+                obj.add("bindViewGroup", gson.toJsonTree(new ArrayList<>(src.bindViewGroupList()), new TypeToken<ArrayList<String>>(){}.getType()).getAsJsonArray());
 
                 return obj;
             }
@@ -432,8 +426,8 @@ public class ButtonEventData implements Cloneable {
                 event.setSwitchTouchMode(Optional.ofNullable(obj.get("switchTouchMode")).map(JsonElement::getAsBoolean).orElse(false));
                 event.setInput(Optional.ofNullable(obj.get("input")).map(JsonElement::getAsBoolean).orElse(false));
                 event.setOutputText(Optional.ofNullable(obj.get("outputText")).map(JsonElement::getAsString).orElse(""));
-                event.setOutputKeycodes(gson.fromJson(Optional.ofNullable(obj.get("outputKeycodes")).map(JsonElement::getAsString).orElse("{}"), new TypeToken<Integer>(){}.getType()));
-                event.setBindViewGroup(gson.fromJson(Optional.ofNullable(obj.get("bindViewGroup")).map(JsonElement::getAsString).orElse("{}"), new TypeToken<String>(){}.getType()));
+                event.setOutputKeycodes(FXCollections.observableList(gson.fromJson(Optional.ofNullable(obj.get("outputKeycodes")).map(JsonElement::getAsJsonArray).orElse(new JsonArray()), new TypeToken<ArrayList<Integer>>(){}.getType())));
+                event.setBindViewGroup(FXCollections.observableList(gson.fromJson(Optional.ofNullable(obj.get("bindViewGroup")).map(JsonElement::getAsJsonArray).orElse(new JsonArray()), new TypeToken<ArrayList<String>>(){}.getType())));
 
                 return event;
             }

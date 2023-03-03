@@ -4,7 +4,9 @@ import static com.tungsten.fcl.util.FXUtils.onInvalidating;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -14,6 +16,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.reflect.TypeToken;
+import com.tungsten.fcl.control.data.ControlViewGroup;
 import com.tungsten.fcl.util.Constants;
 import com.tungsten.fclauncher.FCLPath;
 import com.tungsten.fclcore.fakefx.beans.InvalidationListener;
@@ -23,6 +27,8 @@ import com.tungsten.fclcore.fakefx.beans.property.ReadOnlyIntegerProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleIntegerProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleStringProperty;
 import com.tungsten.fclcore.fakefx.beans.property.StringProperty;
+import com.tungsten.fclcore.fakefx.collections.FXCollections;
+import com.tungsten.fclcore.fakefx.collections.ObservableList;
 import com.tungsten.fclcore.util.ToStringBuilder;
 import com.tungsten.fclcore.util.fakefx.ObservableHelper;
 import com.tungsten.fclcore.util.gson.fakefx.factories.JavaFxPropertyTypeAdapterFactory;
@@ -31,10 +37,12 @@ import com.tungsten.fclcore.util.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @JsonAdapter(Controller.Serializer.class)
-public class Controller implements Observable {
+public class Controller implements Cloneable, Observable {
 
     private final SimpleStringProperty name;
 
@@ -102,6 +110,16 @@ public class Controller implements Observable {
         return controllerVersion.get();
     }
 
+    private final ObservableList<ControlViewGroup> viewGroups;
+
+    public ObservableList<ControlViewGroup> viewGroups() {
+        return viewGroups;
+    }
+
+    public void setViewGroups(ObservableList<ControlViewGroup> viewGroups) {
+        this.viewGroups.addAll(viewGroups);
+    }
+
     public Controller(String name) {
         this(name, "");
     }
@@ -119,14 +137,41 @@ public class Controller implements Observable {
     }
 
     public Controller(String name, String version, String author, String description, int controllerVersion) {
+        this(name, version, author, description, controllerVersion, FXCollections.observableArrayList(new ArrayList<>()));
+    }
+
+    public Controller(String name, String version, String author, String description, int controllerVersion, ObservableList<ControlViewGroup> viewGroups) {
         this.name = new SimpleStringProperty(this, "name", name);
         this.version = new SimpleStringProperty(this, "version", version);
         this.author = new SimpleStringProperty(this, "author", author);
         this.description = new SimpleStringProperty(this, "description", description);
+        this.viewGroups = viewGroups;
 
         this.controllerVersion.set(controllerVersion);
 
         addPropertyChangedListener(onInvalidating(this::invalidate));
+    }
+
+    public void addViewGroup(ControlViewGroup viewGroup) {
+        boolean exist = false;
+        for (ControlViewGroup group : viewGroups()) {
+            if (viewGroup.getId().equals(group.getId())) {
+                exist = true;
+                break;
+            }
+        }
+        if (!exist) {
+            viewGroups.add(viewGroup);
+        }
+    }
+
+    public void removeViewGroup(ControlViewGroup viewGroup) {
+        for (ControlViewGroup group : viewGroups()) {
+            if (viewGroup.getId().equals(group.getId())) {
+                viewGroups.remove(group);
+                break;
+            }
+        }
     }
 
     @NonNull
@@ -146,6 +191,7 @@ public class Controller implements Observable {
         version.addListener(listener);
         author.addListener(listener);
         description.addListener(listener);
+        viewGroups.addListener(listener);
         controllerVersion.addListener(listener);
     }
 
@@ -163,6 +209,13 @@ public class Controller implements Observable {
 
     private void invalidate() {
         observableHelper.invalidate();
+    }
+
+    @Override
+    public Controller clone() {
+        ObservableList<ControlViewGroup> viewGroups = FXCollections.observableArrayList(new ArrayList<>());
+        viewGroups.addAll(viewGroups().stream().map(ControlViewGroup::clone).collect(Collectors.toList()));
+        return new Controller(getName() + "_clone", getVersion(), getAuthor(), getDescription(), getControllerVersion(), viewGroups);
     }
 
     // function
@@ -191,12 +244,15 @@ public class Controller implements Observable {
             if (src == null)
                 return JsonNull.INSTANCE;
 
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("name", src.getName());
             jsonObject.addProperty("version", src.getVersion());
             jsonObject.addProperty("author", src.getAuthor());
             jsonObject.addProperty("description", src.getDescription());
             jsonObject.addProperty("controllerVersion", src.getControllerVersion());
+            jsonObject.add("viewGroups", gson.toJsonTree(new ArrayList<>(src.viewGroups()), new TypeToken<ArrayList<ControlViewGroup>>(){}.getType()).getAsJsonArray());
 
             return jsonObject;
         }
@@ -205,13 +261,16 @@ public class Controller implements Observable {
         public Controller deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             if (json == JsonNull.INSTANCE || !(json instanceof JsonObject)) return null;
             JsonObject obj = (JsonObject) json;
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
             String name = Optional.ofNullable(obj.get("name")).map(JsonElement::getAsString).orElse("Error");
             String version = Optional.ofNullable(obj.get("version")).map(JsonElement::getAsString).orElse("");
             String author = Optional.ofNullable(obj.get("author")).map(JsonElement::getAsString).orElse("");
             String description = Optional.ofNullable(obj.get("description")).map(JsonElement::getAsString).orElse("");
             int controllerVersion = Optional.ofNullable(obj.get("controllerVersion")).map(JsonElement::getAsInt).orElse(Constants.CONTROLLER_VERSION);
+            ObservableList<ControlViewGroup> viewGroups = FXCollections.observableList(gson.fromJson(Optional.ofNullable(obj.get("viewGroups")).map(JsonElement::getAsJsonArray).orElse(new JsonArray()), new TypeToken<ArrayList<ControlViewGroup>>(){}.getType()));
 
-            return new Controller(name, version, author, description, controllerVersion);
+            return new Controller(name, version, author, description, controllerVersion, viewGroups);
         }
 
     }

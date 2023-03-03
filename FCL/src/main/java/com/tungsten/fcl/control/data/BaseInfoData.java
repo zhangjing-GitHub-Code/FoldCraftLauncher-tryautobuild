@@ -1,5 +1,7 @@
 package com.tungsten.fcl.control.data;
 
+import static com.tungsten.fcl.util.FXUtils.onInvalidating;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -12,20 +14,45 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.JsonAdapter;
 import com.tungsten.fclcore.fakefx.beans.InvalidationListener;
+import com.tungsten.fclcore.fakefx.beans.Observable;
 import com.tungsten.fclcore.fakefx.beans.property.IntegerProperty;
 import com.tungsten.fclcore.fakefx.beans.property.ObjectProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleIntegerProperty;
 import com.tungsten.fclcore.fakefx.beans.property.SimpleObjectProperty;
+import com.tungsten.fclcore.util.fakefx.ObservableHelper;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
 
 @JsonAdapter(BaseInfoData.Serializer.class)
-public class BaseInfoData implements Cloneable {
+public class BaseInfoData implements Cloneable, Observable {
 
     public enum SizeType {
         PERCENTAGE,
         ABSOLUTE
+    }
+
+    public enum VisibilityType {
+        ALWAYS,
+        IN_GAME,
+        MENU
+    }
+
+    /**
+     * Visibility type
+     */
+    private final ObjectProperty<VisibilityType> visibilityTypeProperty = new SimpleObjectProperty<>(this, "visibilityType", VisibilityType.ALWAYS);
+
+    public ObjectProperty<VisibilityType> visibilityTypeProperty() {
+        return visibilityTypeProperty;
+    }
+
+    public void setVisibilityType(VisibilityType visibilityType) {
+        visibilityTypeProperty.set(visibilityType);
+    }
+
+    public VisibilityType getVisibilityType() {
+        return visibilityTypeProperty.get();
     }
 
     /**
@@ -152,24 +179,40 @@ public class BaseInfoData implements Cloneable {
     }
 
     public BaseInfoData() {
-
+        addPropertyChangedListener(onInvalidating(this::invalidate));
     }
 
     public void addPropertyChangedListener(InvalidationListener listener) {
+        visibilityTypeProperty.addListener(listener);
         xPositionProperty.addListener(listener);
         yPositionProperty.addListener(listener);
         sizeTypeProperty.addListener(listener);
         absoluteWidthProperty.addListener(listener);
         absoluteHeightProperty.addListener(listener);
         percentageWidthProperty.addListener(listener);
-        percentageWidthProperty.get().addPropertyChangedListener(listener);
         percentageHeightProperty.addListener(listener);
-        percentageHeightProperty.get().addPropertyChangedListener(listener);
+    }
+
+    private ObservableHelper observableHelper = new ObservableHelper(this);
+
+    @Override
+    public void addListener(InvalidationListener listener) {
+        observableHelper.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+        observableHelper.removeListener(listener);
+    }
+
+    private void invalidate() {
+        observableHelper.invalidate();
     }
 
     @Override
     public BaseInfoData clone() {
         BaseInfoData data = new BaseInfoData();
+        data.setVisibilityType(getVisibilityType());
         data.setXPosition(getXPosition());
         data.setYPosition(getYPosition());
         data.setSizeType(getSizeType());
@@ -188,6 +231,7 @@ public class BaseInfoData implements Cloneable {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+            obj.addProperty("visibilityType", src.getVisibilityType().toString());
             obj.addProperty("xPosition", src.getXPosition());
             obj.addProperty("yPosition", src.getYPosition());
             obj.addProperty("sizeType", src.getSizeType().toString());
@@ -208,6 +252,7 @@ public class BaseInfoData implements Cloneable {
             BaseInfoData data = new BaseInfoData();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+            data.setVisibilityType(getVisibilityType(Optional.ofNullable(obj.get("visibilityType")).map(JsonElement::getAsString).orElse(VisibilityType.ALWAYS.toString())));
             data.setXPosition(Optional.ofNullable(obj.get("xPosition")).map(JsonElement::getAsInt).orElse(0));
             data.setYPosition(Optional.ofNullable(obj.get("yPosition")).map(JsonElement::getAsInt).orElse(0));
             data.setSizeType(Optional.ofNullable(obj.get("sizeType")).map(JsonElement::getAsString).orElse(SizeType.PERCENTAGE.toString()).equals(SizeType.ABSOLUTE.toString()) ? SizeType.ABSOLUTE : SizeType.PERCENTAGE);
@@ -226,10 +271,20 @@ public class BaseInfoData implements Cloneable {
 
             return data;
         }
+
+        public VisibilityType getVisibilityType(String type) {
+            if (type.equals(VisibilityType.IN_GAME.toString())) {
+                return VisibilityType.IN_GAME;
+            } else if (type.equals(VisibilityType.MENU.toString())) {
+                return VisibilityType.MENU;
+            } else {
+                return VisibilityType.ALWAYS;
+            }
+        }
     }
 
     @JsonAdapter(PercentageSize.Serializer.class)
-    public static class PercentageSize implements Cloneable {
+    public static class PercentageSize implements Cloneable, Observable {
         
         public enum Reference {
             SCREEN_WIDTH,
@@ -274,12 +329,28 @@ public class BaseInfoData implements Cloneable {
         }
         
         public PercentageSize() {
-            
+            addPropertyChangedListener(onInvalidating(this::invalidate));
         }
 
         public void addPropertyChangedListener(InvalidationListener listener) {
             referenceProperty.addListener(listener);
             sizeProperty.addListener(listener);
+        }
+
+        private ObservableHelper observableHelper = new ObservableHelper(this);
+
+        @Override
+        public void addListener(InvalidationListener listener) {
+            observableHelper.addListener(listener);
+        }
+
+        @Override
+        public void removeListener(InvalidationListener listener) {
+            observableHelper.removeListener(listener);
+        }
+
+        private void invalidate() {
+            observableHelper.invalidate();
         }
 
         @Override
