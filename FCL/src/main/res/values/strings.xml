@@ -116,6 +116,29 @@
     <string name="download_failed">Failed to download %1$s, response code: %2$d</string>
     <string name="download_failed_empty">No versions are available</string>
 
+    <string name="event_button_press">Press</string>
+    <string name="event_button_long_press">Long Press</string>
+    <string name="event_button_click">Click</string>
+    <string name="event_button_double_click">Double Click</string>
+    <string name="event_button_pointer_follow">Pointer Follow</string>
+    <string name="event_button_auto_keep">Keep Pressing</string>
+    <string name="event_button_auto_click">Keep Clicking</string>
+    <string name="event_button_open_menu">Open Menu</string>
+    <string name="event_button_movable">Movable</string>
+    <string name="event_button_switch_touch_mode">Switch Touch Mode</string>
+    <string name="event_button_input">Input</string>
+    <string name="event_button_quick_input">Open Quick Input Dialog</string>
+    <string name="event_button_output_text">Output Text</string>
+    <string name="event_button_output_keycodes">Output Keycodes</string>
+    <string name="event_button_bind_view_groups">Show/Hide View Groups</string>
+    <string name="event_rocker_up_keycode">Forward Keycode</string>
+    <string name="event_rocker_down_keycode">Back Keycode</string>
+    <string name="event_rocker_left_keycode">Left Keycode</string>
+    <string name="event_rocker_right_keycode">Right Keycode</string>
+    <string name="event_rocker_follow_option">Follow Option (Only Rocker Style)</string>
+    <string name="event_rocker_sneak">Double Click Center to Enable Sneak</string>
+    <string name="event_rocker_sneak_keycode">Sneak Keycode</string>
+
     <string name="exception_access_denied">Unable to access the file %s.</string>
     <string name="exception_artifact_malformed">Cannot verify the integrity of the downloaded files.</string>
     <string name="exception_ssl_handshake">Unable to establish SSL connection due to missing SSL certificates in current Java installation.</string>
@@ -193,6 +216,15 @@
     <string name="menu_controls_style">Styles</string>
     <string name="menu_controls_button_style">Button Styles</string>
     <string name="menu_controls_direction_style">Direction Controller Styles</string>
+
+    <string name="menu_control_base">Basic Setting</string>
+    <string name="menu_control_button">Button</string>
+    <string name="menu_control_button_text">Text</string>
+    <string name="menu_control_direction">Direction Controller</string>
+    <string name="menu_control_event">Event Setting</string>
+    <string name="menu_control_select">Select</string>
+    <string name="menu_control_set">Set</string>
+    <string name="menu_control_style">Style Setting</string>
 
     <string name="menu_settings">Settings</string>
     <string name="menu_settings_debug">Debug</string>
@@ -363,6 +395,24 @@
     <string name="version_manage_rename_fail">Rename failed</string>
     <string name="version_new_profile">New Directory</string>
     <string name="version_update">Update Modpack</string>
+
+    <string name="view_info_visibility">Visibility Option</string>
+    <string name="view_info_visibility_always">Always Visible</string>
+    <string name="view_info_visibility_game">Visible in Game</string>
+    <string name="view_info_visibility_menu">Visible out of Game</string>
+    <string name="view_info_x">X Position</string>
+    <string name="view_info_y">Y Position</string>
+    <string name="view_info_size_type">Size Measurement</string>
+    <string name="view_info_size_type_percentage">Percentage Size</string>
+    <string name="view_info_size_type_absolute">Absolute Size</string>
+    <string name="view_info_width">Width</string>
+    <string name="view_info_height">Height</string>
+    <string name="view_info_width_reference">Width Reference</string>
+    <string name="view_info_height_reference">Height Reference</string>
+    <string name="view_info_size">Size</string>
+    <string name="view_info_reference">Size Reference</string>
+    <string name="view_info_reference_width">Screen Width</string>
+    <string name="view_info_reference_height">Screen Height</string>
 
     <string name="world">Worlds</string>
     <string name="world_manage">Worlds / Datapacks</string>
