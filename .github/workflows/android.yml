@@ -67,14 +67,14 @@ jobs:
     - name: force gradle daemon
       run: |
         export GRADLE_OPTS=-Dorg.gradle.daemon=true:$GRADLE_OPTS
-    #- uses: actions/cache@v2
-    #  with:
-    #    path: |
-    #      ~/.gradle/caches
-    #      ~/.gradle/wrapper
-    #      !~/.gradle/caches/build-cache-*
-    #    key: gradle-deps-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-    #    restore-keys: gradle-deps
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          !~/.gradle/caches/build-cache-*
+        key: gradle-deps-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: gradle-deps
     # well this embedded build
     - uses: burrunan/gradle-cache-action@v1
       name: Gradle build with better cache
