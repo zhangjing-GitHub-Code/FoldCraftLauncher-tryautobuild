@@ -44,7 +44,7 @@ jobs:
         git config --global pack.threads "1"
         git config --global pack.deltaCacheSize "512m"
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Check release double times
       run: |
         # find . -name *se*sh*
@@ -59,7 +59,7 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     - name: Checkout Android Keystore
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: zhangjing-GitHub-Code/jks-props
         token: ${{ secrets.KS_REPO_PAT }} # 连接仓库的token,需要单独配置
@@ -67,7 +67,7 @@ jobs:
     - name: force gradle daemon
       run: |
         export GRADLE_OPTS=-Dorg.gradle.daemon=true:$GRADLE_OPTS
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: |
           ~/.gradle/caches
@@ -76,12 +76,13 @@ jobs:
         key: gradle-deps-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: gradle-deps
     # well this embedded build
-    - uses: burrunan/gradle-cache-action@v1
+    - uses: burrunan/gradle-cache-action@v1.19
       name: Gradle build with better cache
       # Extra environment variables for Gradle execution (regular GitHub Actions feature)
       # Note: env must be outside of "with"
       env:
         VARIABLE: VALUE
+        GRADLE_OPTS: '-Dorg.gradle.daemon=true'
       with:
         # If you have multiple jobs, use distinct job-id in in case you want to split caches
         # For instance, jobs with different JDK versions can't share caches
