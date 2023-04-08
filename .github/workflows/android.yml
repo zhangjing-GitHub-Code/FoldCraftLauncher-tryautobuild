@@ -73,8 +73,16 @@ jobs:
           ~/.gradle/caches
           ~/.gradle/wrapper
           !~/.gradle/caches/build-cache-*
-        key: gradle-deps-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        key: gradle-deps-*
         restore-keys: gradle-deps
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          !~/.gradle/caches/build-cache-*
+        key: gradle-dep-any
+        restore-keys: gradle-dep-any
     # well this embedded build
     - uses: burrunan/gradle-cache-action@v1.19
       name: Gradle build with better cache
