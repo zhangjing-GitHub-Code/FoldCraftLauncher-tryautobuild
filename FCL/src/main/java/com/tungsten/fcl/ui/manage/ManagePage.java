@@ -1,7 +1,9 @@
 package com.tungsten.fcl.ui.manage;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.View;
+import android.widget.ScrollView;
 
 import com.tungsten.fcl.R;
 import com.tungsten.fcl.setting.Profile;
@@ -14,6 +16,7 @@ import com.tungsten.fclcore.task.Task;
 import com.tungsten.fclcore.util.io.FileUtils;
 import com.tungsten.fcllibrary.browser.FileBrowser;
 import com.tungsten.fcllibrary.browser.options.LibMode;
+import com.tungsten.fcllibrary.component.theme.ThemeEngine;
 import com.tungsten.fcllibrary.component.ui.FCLCommonPage;
 import com.tungsten.fcllibrary.component.view.FCLImageButton;
 import com.tungsten.fcllibrary.component.view.FCLLinearLayout;
@@ -25,12 +28,17 @@ public class ManagePage extends FCLCommonPage implements ManageUI.VersionLoadabl
 
     private final BooleanProperty currentVersionUpgradable = new SimpleBooleanProperty();
 
+    private ScrollView left;
+    private ScrollView right;
+
     private FCLImageButton browseGame;
     private FCLImageButton browseMod;
     private FCLImageButton browseConfig;
     private FCLImageButton browseResourcepack;
+    private FCLImageButton browseShaderPack;
     private FCLImageButton browseScreenshot;
     private FCLImageButton browseSave;
+    private FCLImageButton browseLog;
     private FCLImageButton update;
     private FCLImageButton rename;
     private FCLImageButton duplicate;
@@ -57,12 +65,19 @@ public class ManagePage extends FCLCommonPage implements ManageUI.VersionLoadabl
     }
 
     private void create() {
+        left = findViewById(R.id.left);
+        right = findViewById(R.id.right);
+        ThemeEngine.getInstance().registerEvent(left, () -> left.setBackgroundTintList(new ColorStateList(new int[][] { { } }, new int[] { ThemeEngine.getInstance().getTheme().getLtColor() })));
+        ThemeEngine.getInstance().registerEvent(right, () -> right.setBackgroundTintList(new ColorStateList(new int[][] { { } }, new int[] { ThemeEngine.getInstance().getTheme().getLtColor() })));
+
         browseGame = findViewById(R.id.browse_game_dir);
         browseMod = findViewById(R.id.browse_mods);
         browseConfig = findViewById(R.id.browse_config);
         browseResourcepack = findViewById(R.id.browse_resourcepacks);
+        browseShaderPack = findViewById(R.id.browse_shader_packs);
         browseScreenshot = findViewById(R.id.browse_screenshots);
         browseSave = findViewById(R.id.browse_saves);
+        browseLog = findViewById(R.id.browse_logs);
         update = findViewById(R.id.update);
         rename = findViewById(R.id.rename);
         duplicate = findViewById(R.id.duplicate);
@@ -74,8 +89,10 @@ public class ManagePage extends FCLCommonPage implements ManageUI.VersionLoadabl
         browseMod.setOnClickListener(this);
         browseConfig.setOnClickListener(this);
         browseResourcepack.setOnClickListener(this);
+        browseShaderPack.setOnClickListener(this);
         browseScreenshot.setOnClickListener(this);
         browseSave.setOnClickListener(this);
+        browseLog.setOnClickListener(this);
         update.setOnClickListener(this);
         rename.setOnClickListener(this);
         duplicate.setOnClickListener(this);
@@ -108,11 +125,11 @@ public class ManagePage extends FCLCommonPage implements ManageUI.VersionLoadabl
     }
 
     private void updateGame() {
-        Versions.updateVersion(getProfile(), getVersion());
+        Versions.updateVersion(getContext(), getParent(), getProfile(), getVersion());
     }
 
     private void export() {
-        Versions.exportVersion(getProfile(), getVersion());
+        Versions.exportVersion(getContext(), getParent(), getProfile(), getVersion());
     }
 
     private void rename() {
@@ -146,11 +163,17 @@ public class ManagePage extends FCLCommonPage implements ManageUI.VersionLoadabl
         if (view == browseResourcepack) {
             onBrowse("resourcepacks");
         }
+        if (view == browseShaderPack) {
+            onBrowse("shaderpacks");
+        }
         if (view == browseScreenshot) {
             onBrowse("screenshots");
         }
         if (view == browseSave) {
             onBrowse("saves");
+        }
+        if (view == browseLog) {
+            onBrowse("logs");
         }
         if (view == update) {
             updateGame();

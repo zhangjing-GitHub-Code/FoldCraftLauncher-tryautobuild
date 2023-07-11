@@ -17,7 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageView;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.tabs.TabLayout;
@@ -34,6 +34,7 @@ import com.tungsten.fclcore.auth.CharacterSelector;
 import com.tungsten.fclcore.auth.NoSelectedCharacterException;
 import com.tungsten.fclcore.auth.authlibinjector.AuthlibInjectorAccountFactory;
 import com.tungsten.fclcore.auth.authlibinjector.AuthlibInjectorServer;
+import com.tungsten.fclcore.auth.authlibinjector.BoundAuthlibInjectorAccountFactory;
 import com.tungsten.fclcore.auth.microsoft.MicrosoftAccountFactory;
 import com.tungsten.fclcore.auth.offline.OfflineAccountFactory;
 import com.tungsten.fclcore.auth.yggdrasil.GameProfile;
@@ -50,16 +51,20 @@ import com.tungsten.fcllibrary.component.dialog.FCLDialog;
 import com.tungsten.fcllibrary.component.view.FCLButton;
 import com.tungsten.fcllibrary.component.view.FCLEditText;
 import com.tungsten.fcllibrary.component.view.FCLImageButton;
+import com.tungsten.fcllibrary.component.view.FCLImageView;
 import com.tungsten.fcllibrary.component.view.FCLTabLayout;
 import com.tungsten.fcllibrary.component.view.FCLTextView;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Pattern;
 
 public class CreateAccountDialog extends FCLDialog implements View.OnClickListener, TabLayout.OnTabSelectedListener {
 
     private static CreateAccountDialog instance;
+
+    private static final Pattern USERNAME_CHECKER_PATTERN = Pattern.compile("^[A-Za-z0-9_]+$");
 
     private FCLTextView title;
     private FCLTabLayout tabLayout;
@@ -92,6 +97,10 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
         init(factory);
     }
 
+    public CreateAccountDialog(@NonNull Context context, AuthlibInjectorServer authServer) {
+        this(context, Accounts.getAccountFactoryByAuthlibInjectorServer(authServer));
+    }
+
     private void init(AccountFactory<?> factory) {
         if (factory == null) {
             showMethodSwitcher = true;
@@ -114,8 +123,7 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
                 titleId = R.string.account_create_offline;
             } else if (factory instanceof MicrosoftAccountFactory) {
                 titleId = R.string.account_create_microsoft;
-            }
-            else {
+            } else {
                 titleId = R.string.account_create_external;
             }
         }
@@ -135,6 +143,9 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
         }
         if (factory instanceof AuthlibInjectorAccountFactory) {
             details = new ExternalDetails(getContext());
+        }
+        if (factory instanceof BoundAuthlibInjectorAccountFactory) {
+            details = new ExternalDetails(getContext(), ((BoundAuthlibInjectorAccountFactory) factory).getServer());
         }
         detailsContainer.removeAllViews();
         detailsContainer.addView(details.getView(), ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -158,42 +169,60 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
             return;
         }
 
-        deviceCode.set(null);
+        Runnable doCreate = () -> {
+            deviceCode.set(null);
 
-        CharacterSelector selector = new DialogCharacterSelector(getContext());
-        loginTask = Task.supplyAsync(() -> factory.create(selector, username, password, null, additionalData))
-                .whenComplete(Schedulers.androidUIThread(), account -> {
-                    int oldIndex = Accounts.getAccounts().indexOf(account);
-                    if (oldIndex == -1) {
-                        Accounts.getAccounts().add(account);
-                    } else {
-                        // adding an already-added account
-                        // instead of discarding the new account, we first remove the existing one then add the new one
-                        Accounts.getAccounts().remove(oldIndex);
-                        Accounts.getAccounts().add(oldIndex, account);
-                    }
+            CharacterSelector selector = new DialogCharacterSelector(getContext());
+            loginTask = Task.supplyAsync(() -> factory.create(selector, username, password, null, additionalData))
+                    .whenComplete(Schedulers.androidUIThread(), account -> {
+                        int oldIndex = Accounts.getAccounts().indexOf(account);
+                        if (oldIndex == -1) {
+                            Accounts.getAccounts().add(account);
+                        } else {
+                            // adding an already-added account
+                            // instead of discarding the new account, we first remove the existing one then add the new one
+                            Accounts.getAccounts().remove(oldIndex);
+                            Accounts.getAccounts().add(oldIndex, account);
+                        }
 
-                    // select the new account
-                    Accounts.setSelectedAccount(account);
+                        // select the new account
+                        Accounts.setSelectedAccount(account);
 
-                    login.setEnabled(true);
-                    cancel.setEnabled(true);
-                    UIManager.getInstance().getAccountUI().refresh().start();
-                    dismiss();
-                }, exception -> {
-                    if (exception instanceof NoSelectedCharacterException) {
+                        login.setEnabled(true);
+                        cancel.setEnabled(true);
+                        UIManager.getInstance().getAccountUI().refresh().start();
                         dismiss();
-                    } else {
-                        FCLAlertDialog.Builder builder = new FCLAlertDialog.Builder(getContext());
-                        builder.setAlertLevel(FCLAlertDialog.AlertLevel.ALERT);
-                        builder.setMessage(Accounts.localizeErrorMessage(getContext(), exception));
-                        builder.setCancelable(false);
-                        builder.setNegativeButton(getContext().getString(com.tungsten.fcllibrary.R.string.dialog_positive), null);
-                        builder.create().show();
-                    }
-                    login.setEnabled(true);
-                    cancel.setEnabled(true);
-                }).executor(true);
+                    }, exception -> {
+                        if (exception instanceof NoSelectedCharacterException) {
+                            dismiss();
+                        } else {
+                            FCLAlertDialog.Builder builder = new FCLAlertDialog.Builder(getContext());
+                            builder.setAlertLevel(FCLAlertDialog.AlertLevel.ALERT);
+                            builder.setMessage(Accounts.localizeErrorMessage(getContext(), exception));
+                            builder.setCancelable(false);
+                            builder.setNegativeButton(getContext().getString(com.tungsten.fcllibrary.R.string.dialog_positive), null);
+                            builder.create().show();
+                        }
+                        login.setEnabled(true);
+                        cancel.setEnabled(true);
+                    }).executor(true);
+        };
+
+        if (factory instanceof OfflineAccountFactory && username != null && !USERNAME_CHECKER_PATTERN.matcher(username).matches()) {
+            FCLAlertDialog.Builder builder = new FCLAlertDialog.Builder(getContext());
+            builder.setAlertLevel(FCLAlertDialog.AlertLevel.ALERT);
+            builder.setTitle(getContext().getString(R.string.message_warning));
+            builder.setMessage(getContext().getString(R.string.account_methods_offline_name_invalid));
+            builder.setCancelable(false);
+            builder.setPositiveButton(doCreate::run);
+            builder.setNegativeButton(() -> {
+                login.setEnabled(true);
+                cancel.setEnabled(true);
+            });
+            builder.create().show();
+        } else {
+            doCreate.run();
+        }
     }
 
     private void onCancel() {
@@ -323,7 +352,7 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
         }
     }
 
-    private static class ExternalDetails implements Details, View.OnClickListener {
+    private static class ExternalDetails implements Details {
 
         private static final String[] ALLOWED_LINKS = { "homepage", "register" };
 
@@ -333,27 +362,31 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
         private FCLTextView serverName;
         private FCLImageButton home;
         private FCLImageButton register;
-        private FCLImageButton setting;
         private final FCLEditText username;
         private final FCLEditText password;
 
+        @Nullable
+        private final AuthlibInjectorServer server;
+
         public ExternalDetails(Context context) {
+            this(context, config().getAuthlibInjectorServers().size() == 0 ? null : config().getAuthlibInjectorServers().get(0));
+        }
+
+        public ExternalDetails(Context context, @Nullable AuthlibInjectorServer server) {
             this.context = context;
             this.view = LayoutInflater.from(context).inflate(R.layout.view_create_account_external, null);
 
             serverName = view.findViewById(R.id.server_name);
             home = view.findViewById(R.id.home);
             register = view.findViewById(R.id.register);
-            setting = view.findViewById(R.id.setting);
             username = view.findViewById(R.id.username);
             password = view.findViewById(R.id.password);
 
-            setting.setOnClickListener(this);
-
-            refreshAuthenticateServer(config().getAuthlibInjectorServers().size() == 0 ? null : config().getAuthlibInjectorServers().get(0));
+            this.server = server;
+            refreshAuthenticateServer(server);
         }
 
-        private void refreshAuthenticateServer(AuthlibInjectorServer authlibInjectorServer) {
+        public void refreshAuthenticateServer(AuthlibInjectorServer authlibInjectorServer) {
             if (authlibInjectorServer == null) {
                 serverName.setText(context.getString(R.string.account_create_server_not_select));
                 home.setVisibility(View.GONE);
@@ -403,19 +436,15 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
 
         @Override
         public Object getAdditionalData() throws IllegalStateException {
-            return null;
+            if (server == null) {
+                throw new IllegalStateException(context.getString(R.string.account_create_server_not_select));
+            }
+            return server;
         }
 
         @Override
         public View getView() throws IllegalStateException {
             return view;
-        }
-
-        @Override
-        public void onClick(View view) {
-            if (view == setting) {
-
-            }
         }
     }
 
@@ -492,12 +521,22 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
 
             static class ViewHolder {
                 ConstraintLayout parent;
-                AppCompatImageView avatar;
+                FCLImageView avatar;
                 FCLTextView name;
             }
 
             interface Listener {
                 void onSelect(GameProfile profile);
+            }
+
+            @Override
+            public int getCount() {
+                return profiles.size();
+            }
+
+            @Override
+            public Object getItem(int i) {
+                return profiles.get(i);
             }
 
             @Override
@@ -510,16 +549,13 @@ public class CreateAccountDialog extends FCLDialog implements View.OnClickListen
                     viewHolder.avatar = view.findViewById(R.id.avatar);
                     viewHolder.name = view.findViewById(R.id.name);
                     view.setTag(viewHolder);
-                }
-                else {
+                } else {
                     viewHolder = (ViewHolder) view.getTag();
                 }
                 GameProfile gameProfile = profiles.get(i);
                 viewHolder.name.setText(gameProfile.getName());
-                viewHolder.avatar.setBackground(TexturesLoader.avatarBinding(service, gameProfile.getId(), 32).get());
-                viewHolder.parent.setOnClickListener(view1 -> {
-                    listener.onSelect(gameProfile);
-                });
+                viewHolder.avatar.imageProperty().bind(TexturesLoader.avatarBinding(service, gameProfile.getId(), 32));
+                viewHolder.parent.setOnClickListener(view1 -> listener.onSelect(gameProfile));
                 return view;
             }
         }
