@@ -3,9 +3,7 @@ name: Android CI
 on:
   workflow_dispatch:
   push:
-    branches:
-      - 'master'
-      - 'main'
+    branches: '*'
     # 在push tag时触发
     tags: []
   pull_request:
