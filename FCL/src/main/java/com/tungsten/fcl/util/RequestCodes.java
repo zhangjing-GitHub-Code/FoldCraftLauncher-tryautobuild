@@ -27,4 +27,12 @@ public class RequestCodes {
     public static final int SELECT_MODPACK_CODE = 550;
 
     public static final int SELECT_EXPORT_FOLDER_CODE = 600;
+
+    public static final int SELECT_WORLD_CODE = 650;
+
+    public static final int SELECT_WORLD_EXPORT_CODE = 700;
+
+    public static final int SELECT_DATAPACK_CODE = 750;
+
+    public static final int SELECT_LAUNCHER_BACKGROUND_CODE = 800;
 }
